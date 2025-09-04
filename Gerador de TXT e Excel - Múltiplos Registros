@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador TXT e Excel - Registros Múltiplos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    input {
+      width: 400px;
+      margin-bottom: 8px;
+      padding: 6px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-top: 10px;
+      padding: 8px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #aaa;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    .resultado {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Gerador de TXT e Excel - Múltiplos Registros</h2>
+
+  <!-- Campos de entrada -->
+  <label>HOST: <input list="hostList" type="text" id="host"></label><br>
+  <label>DESCRIÇÃO DO ALERTA: <input list="descricaoList" type="text" id="descricao"></label><br>
+  <label>OBJETO MONITORADO: <input list="objetoList" type="text" id="objeto"></label><br>
+  <label>ENDEREÇO IP: <input list="ipList" type="text" id="ip"></label><br>
+  <label>INÍCIO DO ALERTA: <input list="inicioList" type="text" id="inicio"></label><br>
+  <label>HORÁRIO DO ACCIONAMENTO: <input list="horarioList" type="text" id="horario"></label><br>
+  <label>ANALISTA ACIONADO: <input list="analistaList" type="text" id="analista"></label><br>
+  <label>CRITICIDADE: <input list="criticidadeList" type="text" id="criticidade"></label><br>
+  <label>TORRE DO SERVIÇO: <input list="torreList" type="text" id="torre"></label><br>
+  <label>FERRAMENTA DE MONITORIA: <input list="ferramentaList" type="text" id="ferramenta"></label><br>
+  <label>NÚMERO DO CHAMADO: <input list="chamadoList" type="text" id="chamado"></label><br>
+
+  <!-- Botões -->
+  <button onclick="adicionarRegistro()">Adicionar Registro</button>
+  <button onclick="gerarTXT()">Gerar TXT</button>
+  <button onclick="gerarExcel()">Gerar Excel</button>
+  <button onclick="limparCampos()">Limpar</button>
+  <button onclick="apagarRegistros()">Apagar Todos os Registros</button>
+  <input type="file" id="importarArquivo" accept=".xlsx,.xls" onchange="importarExcel(event)">
+  <label for="importarArquivo"><button>Importar Excel</button></label>
+
+  <!-- Tabela -->
+  <table id="tabelaRegistros">
+    <thead>
+      <tr>
+        <th>HOST</th>
+        <th>DESCRIÇÃO DO ALERTA</th>
+        <th>OBJETO MONITORADO</th>
+        <th>ENDEREÇO IP</th>
+        <th>INÍCIO DO ALERTA</th>
+        <th>HORÁRIO DO ACIONAMENTO</th>
+        <th>ANALISTA ACIONADO</th>
+        <th>CRITICIDADE</th>
+        <th>TORRE DO SERVIÇO</th>
+        <th>FERRAMENTA DE MONITORIA</th>
+        <th>NÚMERO DO CHAMADO</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Pré-visualização -->
+  <div class="resultado">
+    <h3>Pré-visualização (TXT):</h3>
+    <textarea id="preview" readonly></textarea><br>
+  </div>
+
+  <!-- DATALISTS (preenchidos dinamicamente) -->
+  <datalist id="hostList"></datalist>
+  <datalist id="descricaoList"></datalist>
+  <datalist id="objetoList"></datalist>
+  <datalist id="ipList"></datalist>
+  <datalist id="inicioList"></datalist>
+  <datalist id="horarioList"></datalist>
+  <datalist id="analistaList"></datalist>
+  <datalist id="criticidadeList"></datalist>
+  <datalist id="torreList"></datalist>
+  <datalist id="ferramentaList"></datalist>
+  <datalist id="chamadoList"></datalist>
+
+  <script>
+    let registros = [];
+
+    function adicionarRegistro(registroManual = null) {
+      const registro = registroManual || {
+        host: document.getElementById("host").value,
+        descricao: document.getElementById("descricao").value,
+        objeto: document.getElementById("objeto").value,
+        ip: document.getElementById("ip").value,
+        inicio: document.getElementById("inicio").value,
+        horario: document.getElementById("horario").value,
+        analista: document.getElementById("analista").value,
+        criticidade: document.getElementById("criticidade").value,
+        torre: document.getElementById("torre").value,
+        ferramenta: document.getElementById("ferramenta").value,
+        chamado: document.getElementById("chamado").value
+      };
+
+      registros.push(registro);
+      atualizarTabela();
+      atualizarDatalists();
+      limparCampos();
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector("#tabelaRegistros tbody");
+      tbody.innerHTML = "";
+      registros.forEach(r => {
+        const row = `<tr>
+          <td>${r.host}</td>
+          <td>${r.descricao}</td>
+          <td>${r.objeto}</td>
+          <td>${r.ip}</td>
+          <td>${r.inicio}</td>
+          <td>${r.horario}</td>
+          <td>${r.analista}</td>
+          <td>${r.criticidade}</td>
+          <td>${r.torre}</td>
+          <td>${r.ferramenta}</td>
+          <td>${r.chamado}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function atualizarDatalists() {
+      const campos = ["host","descricao","objeto","ip","inicio","horario","analista","criticidade","torre","ferramenta","chamado"];
+      campos.forEach(campo => {
+        const valoresUnicos = [...new Set(registros.map(r => r[campo]).filter(v => v))];
+        const datalist = document.getElementById(campo + "List");
+        datalist.innerHTML = valoresUnicos.map(v => `<option value="${v}">`).join("");
+      });
+    }
+
+    function gerarTXT() {
+      let conteudo = "";
+      registros.forEach((r, i) => {
+        conteudo += `Registro ${i + 1}:\n`;
+        conteudo += `HOST: ${r.host}\nDESCRIÇÃO DO ALERTA: ${r.descricao}\nOBJETO MONITORADO: ${r.objeto}\nENDEREÇO IP: ${r.ip}\nINÍCIO DO ALERTA: ${r.inicio}\nHORÁRIO DO ACIONAMENTO: ${r.horario}\nANALISTA ACIONADO: ${r.analista}\nCRITICIDADE: ${r.criticidade}\nTORRE DO SERVIÇO: ${r.torre}\nFERRAMENTA DE MONITORIA: ${r.ferramenta}\nNÚMERO DO CHAMADO: ${r.chamado}\n\n`;
+      });
+
+      document.getElementById("preview").value = conteudo;
+
+      const blob = new Blob([conteudo], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "registros.txt";
+      link.textContent = "Baixar TXT";
+
+      const resultado = document.querySelector(".resultado");
+      resultado.appendChild(link);
+    }
+
+    function gerarExcel() {
+      const dados = [
+        ["HOST","DESCRIÇÃO","OBJETO","IP","INÍCIO","HORÁRIO","ANALISTA","CRITICIDADE","TORRE","FERRAMENTA","CHAMADO"],
+        ...registros.map(r => [r.host,r.descricao,r.objeto,r.ip,r.inicio,r.horario,r.analista,r.criticidade,r.torre,r.ferramenta,r.chamado])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(dados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Registros");
+
+      XLSX.writeFile(wb, "registros.xlsx");
+    }
+
+    function importarExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        json.slice(1).forEach(row => {
+          if (row.length > 0) {
+            adicionarRegistro({
+              host: row[0] || "",
+              descricao: row[1] || "",
+              objeto: row[2] || "",
+              ip: row[3] || "",
+              inicio: row[4] || "",
+              horario: row[5] || "",
+              analista: row[6] || "",
+              criticidade: row[7] || "",
+              torre: row[8] || "",
+              ferramenta: row[9] || "",
+              chamado: row[10] || ""
+            });
+          }
+        });
+        alert("Dados importados com sucesso!");
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function limparCampos() {
+      document.querySelectorAll("input[type='text'], input[type='number']").forEach(i => i.value = "");
+    }
+
+    function apagarRegistros() {
+      registros = [];
+      atualizarTabela();
+      atualizarDatalists();
+      document.getElementById("preview").value = "";
+      alert("Todos os registros foram apagados!");
+    }
+  </script>
+</body>
+</html>
