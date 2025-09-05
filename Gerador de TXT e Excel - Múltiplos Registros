@@ -8,7 +8,11 @@
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      display: flex;
+      gap: 30px;
     }
+    .form-section { flex: 1; }
+    .preview-section { flex: 1; }
     input {
       width: 400px;
       margin-bottom: 8px;
@@ -16,8 +20,7 @@
     }
     textarea {
       width: 100%;
-      height: 150px;
-      margin-top: 10px;
+      height: 400px;
       padding: 8px;
     }
     button {
@@ -32,70 +35,75 @@
       border-collapse: collapse;
       margin-top: 20px;
     }
-    table, th, td {
-      border: 1px solid #aaa;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-    }
-    .resultado {
-      margin-top: 20px;
+    table, th, td { border: 1px solid #aaa; }
+    th, td { padding: 8px; text-align: left; }
+    .resultado { margin-top: 20px; }
+    .visually-hidden {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
-  <h2>Gerador de TXT e Excel - Múltiplos Registros</h2>
+  <div class="form-section">
+    <h2>Gerador de TXT e Excel - Múltiplos Registros</h2>
 
-  <!-- Campos de entrada -->
-  <label>HOST: <input list="hostList" type="text" id="host"></label><br>
-  <label>DESCRIÇÃO DO ALERTA: <input list="descricaoList" type="text" id="descricao"></label><br>
-  <label>OBJETO MONITORADO: <input list="objetoList" type="text" id="objeto"></label><br>
-  <label>ENDEREÇO IP: <input list="ipList" type="text" id="ip"></label><br>
-  <label>INÍCIO DO ALERTA: <input list="inicioList" type="text" id="inicio"></label><br>
-  <label>HORÁRIO DO ACCIONAMENTO: <input list="horarioList" type="text" id="horario"></label><br>
-  <label>ANALISTA ACIONADO: <input list="analistaList" type="text" id="analista"></label><br>
-  <label>CRITICIDADE: <input list="criticidadeList" type="text" id="criticidade"></label><br>
-  <label>TORRE DO SERVIÇO: <input list="torreList" type="text" id="torre"></label><br>
-  <label>FERRAMENTA DE MONITORIA: <input list="ferramentaList" type="text" id="ferramenta"></label><br>
-  <label>NÚMERO DO CHAMADO: <input list="chamadoList" type="text" id="chamado"></label><br>
+    <!-- Campos de entrada -->
+    <label>HOST: <input list="hostList" type="text" id="host"></label><br>
+    <label>DESCRIÇÃO DO ALERTA: <input list="descricaoList" type="text" id="descricao"></label><br>
+    <label>OBJETO MONITORADO: <input list="objetoList" type="text" id="objeto"></label><br>
+    <label>ENDEREÇO IP: <input list="ipList" type="text" id="ip"></label><br>
+    <label>INÍCIO DO ALERTA: <input list="inicioList" type="text" id="inicio"></label><br>
+    <label>HORÁRIO DO ACIONAMENTO: <input list="horarioList" type="text" id="horario"></label><br>
+    <label>ANALISTA ACIONADO: <input list="analistaList" type="text" id="analista"></label><br>
+    <label>CRITICIDADE: <input list="criticidadeList" type="text" id="criticidade"></label><br>
+    <label>TORRE DO SERVIÇO: <input list="torreList" type="text" id="torre"></label><br>
+    <label>FERRAMENTA DE MONITORIA: <input list="ferramentaList" type="text" id="ferramenta"></label><br>
+    <label>NÚMERO DO CHAMADO: <input list="chamadoList" type="text" id="chamado"></label><br>
 
-  <!-- Botões -->
-  <button onclick="adicionarRegistro()">Adicionar Registro</button>
-  <button onclick="gerarTXT()">Gerar TXT</button>
-  <button onclick="gerarExcel()">Gerar Excel</button>
-  <button onclick="limparCampos()">Limpar</button>
-  <button onclick="apagarRegistros()">Apagar Todos os Registros</button>
-  <input type="file" id="importarArquivo" accept=".xlsx,.xls" onchange="importarExcel(event)">
-  <label for="importarArquivo"><button>Importar Excel</button></label>
+    <!-- Botões -->
+    <button type="button" onclick="adicionarRegistro()">Adicionar Registro</button>
+    <button type="button" onclick="gerarTXT()">Gerar TXT</button>
+    <button type="button" onclick="gerarExcel()">Gerar Excel</button>
+    <button type="button" onclick="limparCampos()">Limpar</button>
+    <button type="button" onclick="apagarRegistros()">Apagar Todos os Registros</button>
 
-  <!-- Tabela -->
-  <table id="tabelaRegistros">
-    <thead>
-      <tr>
-        <th>HOST</th>
-        <th>DESCRIÇÃO DO ALERTA</th>
-        <th>OBJETO MONITORADO</th>
-        <th>ENDEREÇO IP</th>
-        <th>INÍCIO DO ALERTA</th>
-        <th>HORÁRIO DO ACIONAMENTO</th>
-        <th>ANALISTA ACIONADO</th>
-        <th>CRITICIDADE</th>
-        <th>TORRE DO SERVIÇO</th>
-        <th>FERRAMENTA DE MONITORIA</th>
-        <th>NÚMERO DO CHAMADO</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <!-- Botão + input para adicionar múltiplos arquivos -->
+    <button type="button" id="btnAdicionarArquivo">Adicionar Arquivos</button>
+    <input type="file" id="importarArquivo" class="visually-hidden" accept=".xlsx,.xls,.txt" multiple onchange="importarArquivos(event)">
 
-  <!-- Pré-visualização -->
-  <div class="resultado">
-    <h3>Pré-visualização (TXT):</h3>
-    <textarea id="preview" readonly></textarea><br>
+    <!-- Tabela -->
+    <table id="tabelaRegistros">
+      <thead>
+        <tr>
+          <th>HOST</th>
+          <th>DESCRIÇÃO DO ALERTA</th>
+          <th>OBJETO MONITORADO</th>
+          <th>ENDEREÇO IP</th>
+          <th>INÍCIO DO ALERTA</th>
+          <th>HORÁRIO DO ACIONAMENTO</th>
+          <th>ANALISTA ACIONADO</th>
+          <th>CRITICIDADE</th>
+          <th>TORRE DO SERVIÇO</th>
+          <th>FERRAMENTA DE MONITORIA</th>
+          <th>NÚMERO DO CHAMADO</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
-  <!-- DATALISTS (preenchidos dinamicamente) -->
+  <!-- Pré-visualização -->
+  <div class="preview-section">
+    <h3>Pré-visualização do último registro (TXT):</h3>
+    <textarea id="preview" readonly></textarea><br>
+    <div class="resultado"></div>
+  </div>
+
+  <!-- DATALISTS -->
   <datalist id="hostList"></datalist>
   <datalist id="descricaoList"></datalist>
   <datalist id="objetoList"></datalist>
@@ -111,8 +119,14 @@
   <script>
     let registros = [];
 
-    function adicionarRegistro(registroManual = null) {
-      const registro = registroManual || {
+    document.getElementById('btnAdicionarArquivo').addEventListener('click', () => {
+      const fileInput = document.getElementById('importarArquivo');
+      fileInput.value = ''; // permite escolher os mesmos arquivos de novo
+      fileInput.click();
+    });
+
+    function getInputsAtual() {
+      return {
         host: document.getElementById("host").value,
         descricao: document.getElementById("descricao").value,
         objeto: document.getElementById("objeto").value,
@@ -125,11 +139,34 @@
         ferramenta: document.getElementById("ferramenta").value,
         chamado: document.getElementById("chamado").value
       };
+    }
 
+    function textoFromRegistro(r) {
+      return `HOST: ${r.host || ""}
+DESCRIÇÃO DO ALERTA: ${r.descricao || ""}
+OBJETO MONITORADO: ${r.objeto || ""}
+ENDEREÇO IP: ${r.ip || ""}
+INÍCIO DO ALERTA: ${r.inicio || ""}
+HORÁRIO DO ACIONAMENTO: ${r.horario || ""}
+ANALISTA ACIONADO: ${r.analista || ""}
+CRITICIDADE: ${r.criticidade || ""}
+TORRE DO SERVIÇO: ${r.torre || ""}
+FERRAMENTA DE MONITORIA: ${r.ferramenta || ""}
+NÚMERO DO CHAMADO: ${r.chamado || ""}
+`;
+    }
+
+    function algumCampoPreenchido(obj) {
+      return Object.values(obj).some(v => v && String(v).trim() !== "");
+    }
+
+    function adicionarRegistro(registroManual = null) {
+      const registro = registroManual || getInputsAtual();
       registros.push(registro);
       atualizarTabela();
       atualizarDatalists();
-      limparCampos();
+      limparCampos(false);
+      atualizarPreviewFromUltimoRegistro();
     }
 
     function atualizarTabela() {
@@ -137,19 +174,19 @@
       tbody.innerHTML = "";
       registros.forEach(r => {
         const row = `<tr>
-          <td>${r.host}</td>
-          <td>${r.descricao}</td>
-          <td>${r.objeto}</td>
-          <td>${r.ip}</td>
-          <td>${r.inicio}</td>
-          <td>${r.horario}</td>
-          <td>${r.analista}</td>
-          <td>${r.criticidade}</td>
-          <td>${r.torre}</td>
-          <td>${r.ferramenta}</td>
-          <td>${r.chamado}</td>
+          <td>${r.host || ""}</td>
+          <td>${r.descricao || ""}</td>
+          <td>${r.objeto || ""}</td>
+          <td>${r.ip || ""}</td>
+          <td>${r.inicio || ""}</td>
+          <td>${r.horario || ""}</td>
+          <td>${r.analista || ""}</td>
+          <td>${r.criticidade || ""}</td>
+          <td>${r.torre || ""}</td>
+          <td>${r.ferramenta || ""}</td>
+          <td>${r.chamado || ""}</td>
         </tr>`;
-        tbody.innerHTML += row;
+        tbody.insertAdjacentHTML('beforeend', row);
       });
     }
 
@@ -162,42 +199,80 @@
       });
     }
 
+    function atualizarPreviewFromInputs() {
+      const atual = getInputsAtual();
+      document.getElementById("preview").value = algumCampoPreenchido(atual) ? textoFromRegistro(atual) : "";
+    }
+
+    function atualizarPreviewFromUltimoRegistro() {
+      document.getElementById("preview").value = registros.length ? textoFromRegistro(registros[registros.length - 1]) : "";
+    }
+
     function gerarTXT() {
-      let conteudo = "";
-      registros.forEach((r, i) => {
-        conteudo += `Registro ${i + 1}:\n`;
-        conteudo += `HOST: ${r.host}\nDESCRIÇÃO DO ALERTA: ${r.descricao}\nOBJETO MONITORADO: ${r.objeto}\nENDEREÇO IP: ${r.ip}\nINÍCIO DO ALERTA: ${r.inicio}\nHORÁRIO DO ACIONAMENTO: ${r.horario}\nANALISTA ACIONADO: ${r.analista}\nCRITICIDADE: ${r.criticidade}\nTORRE DO SERVIÇO: ${r.torre}\nFERRAMENTA DE MONITORIA: ${r.ferramenta}\nNÚMERO DO CHAMADO: ${r.chamado}\n\n`;
-      });
+      const atual = getInputsAtual();
+      const conteudo = algumCampoPreenchido(atual)
+        ? textoFromRegistro(atual)
+        : (registros.length ? textoFromRegistro(registros[registros.length - 1]) : "");
 
       document.getElementById("preview").value = conteudo;
 
       const blob = new Blob([conteudo], { type: "text/plain" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "registros.txt";
-      link.textContent = "Baixar TXT";
+      link.download = "registro.txt";
+      link.textContent = "⬇️ Baixar TXT";
+      link.style.display = "block";
 
       const resultado = document.querySelector(".resultado");
+      resultado.querySelectorAll("a").forEach(l => l.remove());
       resultado.appendChild(link);
     }
 
     function gerarExcel() {
       const dados = [
         ["HOST","DESCRIÇÃO","OBJETO","IP","INÍCIO","HORÁRIO","ANALISTA","CRITICIDADE","TORRE","FERRAMENTA","CHAMADO"],
-        ...registros.map(r => [r.host,r.descricao,r.objeto,r.ip,r.inicio,r.horario,r.analista,r.criticidade,r.torre,r.ferramenta,r.chamado])
+        ...registros.map(r => [
+          r.host,r.descricao,r.objeto,r.ip,r.inicio,r.horario,r.analista,r.criticidade,r.torre,r.ferramenta,r.chamado
+        ])
       ];
 
       const ws = XLSX.utils.aoa_to_sheet(dados);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Registros");
 
-      XLSX.writeFile(wb, "registros.xlsx");
+      const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([wbout], { type: "application/octet-stream" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "registros.xlsx";
+      link.textContent = "⬇️ Baixar Excel";
+      link.style.display = "block";
+
+      const resultado = document.querySelector(".resultado");
+      resultado.querySelectorAll("a").forEach(l => l.remove());
+      resultado.appendChild(link);
     }
 
-    function importarExcel(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    // Novo: importar vários arquivos de uma vez
+    function importarArquivos(event) {
+      const files = Array.from(event.target.files);
+      if (!files.length) return;
 
+      let processados = 0;
+      files.forEach(file => {
+        const nome = file.name.toLowerCase();
+        if (nome.endsWith(".xlsx") || nome.endsWith(".xls")) {
+          importarExcel(file, () => { processados++; });
+        } else if (nome.endsWith(".txt")) {
+          importarTXT(file, () => { processados++; });
+        } else {
+          alert(`Arquivo não suportado: ${file.name}`);
+        }
+      });
+    }
+
+    function importarExcel(file, cb) {
       const reader = new FileReader();
       reader.onload = function(e) {
         const data = new Uint8Array(e.target.result);
@@ -206,7 +281,7 @@
         const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         json.slice(1).forEach(row => {
-          if (row.length > 0) {
+          if (row && row.length) {
             adicionarRegistro({
               host: row[0] || "",
               descricao: row[1] || "",
@@ -222,13 +297,58 @@
             });
           }
         });
-        alert("Dados importados com sucesso!");
+        atualizarPreviewFromUltimoRegistro();
+        if (cb) cb();
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function limparCampos() {
+    function importarTXT(file, cb) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const conteudo = e.target.result.replace(/\r\n/g, "\n");
+        const blocos = conteudo.split(/\n\s*\n/);
+
+        blocos.forEach(bloco => {
+          const linhas = bloco.split("\n").map(l => l.trim()).filter(Boolean);
+          if (!linhas.length) return;
+
+          const registro = {};
+          linhas.forEach(linha => {
+            const idx = linha.indexOf(":");
+            if (idx === -1) return;
+            const campo = linha.slice(0, idx).trim().toUpperCase();
+            const valor = linha.slice(idx + 1).trim();
+
+            switch (campo) {
+              case "HOST": registro.host = valor; break;
+              case "DESCRIÇÃO DO ALERTA": registro.descricao = valor; break;
+              case "OBJETO MONITORADO": registro.objeto = valor; break;
+              case "ENDEREÇO IP": registro.ip = valor; break;
+              case "INÍCIO DO ALERTA": registro.inicio = valor; break;
+              case "HORÁRIO DO ACIONAMENTO": registro.horario = valor; break;
+              case "ANALISTA ACIONADO": registro.analista = valor; break;
+              case "CRITICIDADE": registro.criticidade = valor; break;
+              case "TORRE DO SERVIÇO": registro.torre = valor; break;
+              case "FERRAMENTA DE MONITORIA": registro.ferramenta = valor; break;
+              case "NÚMERO DO CHAMADO": registro.chamado = valor; break;
+            }
+          });
+
+          if (Object.keys(registro).length) {
+            adicionarRegistro(registro);
+          }
+        });
+
+        atualizarPreviewFromUltimoRegistro();
+        if (cb) cb();
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function limparCampos(atualizarPreview = true) {
       document.querySelectorAll("input[type='text'], input[type='number']").forEach(i => i.value = "");
+      if (atualizarPreview) atualizarPreviewFromInputs();
     }
 
     function apagarRegistros() {
@@ -236,8 +356,14 @@
       atualizarTabela();
       atualizarDatalists();
       document.getElementById("preview").value = "";
+      document.querySelector(".resultado").querySelectorAll("a").forEach(l => l.remove());
+      document.getElementById("importarArquivo").value = "";
       alert("Todos os registros foram apagados!");
     }
+
+    document.querySelectorAll("input[type='text']").forEach(input => {
+      input.addEventListener("input", atualizarPreviewFromInputs);
+    });
   </script>
 </body>
 </html>
